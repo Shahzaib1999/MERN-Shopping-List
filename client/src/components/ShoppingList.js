@@ -9,37 +9,24 @@ import {
     CSSTransition,
     TransitionGroup
 } from 'react-transition-group';
-import uuid from 'uuid';
+import { connect } from 'react-redux';
+import { getItems, deleteItem } from '../actions/ItemActions'
+import PropTypes from 'prop-types';
 
 class ShopingList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            items: [
-                { id: uuid(), name: 'Milk' },
-                { id: uuid(), name: 'Water' },
-                { id: uuid(), name: 'Juice' },
-            ]
-        };
+
+    componentDidMount(){
+        this.props.getItems();
+    }
+
+    onDelete = id =>{
+        this.props.deleteItem(id);
     }
 
     render() {
-        const { items } = this.state;
+        const { items } = this.props.item;
         return (
             <Container>
-                <Button
-                    color="dark"
-                    style={{ marginBottom: '2rem' }}
-                    onClick={() => {
-                        const name = prompt('Enter item name');
-                        if (name) {
-                            this.setState(state => ({
-                                items: [...state.items, { id: uuid(), name }]
-                            }));
-                        }
-                    }}
-                >Add Item
-                </Button>
                 <ListGroup>
                     <TransitionGroup className="shopping-list">
                         {items.map(({ id, name }) => {
@@ -50,10 +37,7 @@ class ShopingList extends Component {
                                             className="remove-btn"
                                             color="danger"
                                             size="sm"
-                                            onClick={() =>
-                                                this.setState(state => ({
-                                                    items: state.items.filter(item => item.id != id)
-                                                }))}
+                                            onClick={this.onDelete.bind(this,id)}
                                         >&times;
                                         </Button>
                                         {name}
@@ -69,4 +53,15 @@ class ShopingList extends Component {
     }
 }
 
-export default ShopingList;
+ShopingList.propTypes = {
+    getItems: PropTypes.func.isRequired,
+    item: PropTypes.object.isRequired
+}
+
+const mapsStateToProps = (state) => ({
+    item: state.item
+})
+
+export default connect(mapsStateToProps, 
+    { getItems, deleteItem }
+)(ShopingList);
